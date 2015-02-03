@@ -1,0 +1,27 @@
+{
+  "name": "markus-g/price-parser",
+  "description": "Parses prices or money strings",
+  "keywords": [
+    "money",
+    "price",
+    "currency",
+    "parser",
+    "string",
+    "float",
+    "locale"
+  ],
+  "version": "0.1.0",
+  "minimum-stability": "dev",
+  "license": "proprietary",
+  "type": "library",
+  "authors": [
+    {
+      "name": "Markus G.",
+      "email": "markus-g@users.noreply.github.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.5.15"
+  },
+  "autoload": {"psr-4": {"PriceParser\\": "src/"}}
+}
