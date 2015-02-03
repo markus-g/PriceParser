@@ -23,5 +23,7 @@
   "require": {
     "php": ">=5.5.15"
   },
-  "autoload": {"psr-4": {"PriceParser\\": "src/"}}
+  "autoload": {
+    "psr-4": {"PriceParser\\": "src/PriceParser/"}
+  }
 }
