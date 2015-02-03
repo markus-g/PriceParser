@@ -31,14 +31,13 @@ $price->getValue();
 Installation
 ------------
 
-Install the library using [composer][1]. Add the following to your `composer.json`:
+Install the library using [composer](http://getcomposer.org/). Add the following to your `composer.json`:
 
 ```json
 {
     "require": {
         "markus-g/price-parser": "0.1.*"
-    },
-    "minimum-stability": "dev"    
+    }
 }
 ```
 
