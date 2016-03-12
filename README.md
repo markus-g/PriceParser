@@ -24,6 +24,9 @@ $price->getCurrencyName();
 
 //the raw value, e.g. 12,499,50 €
 $price->getValue();
+
+//price is valid if a currency can be found and amount is not empty or null
+$price->isValid();
 ```
 
 

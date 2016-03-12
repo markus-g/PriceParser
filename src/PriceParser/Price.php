@@ -72,26 +72,40 @@ class Price
     private function parseCurrency($priceString)
     {
         preg_match('/^(\D*)\s*([\d,\.]+)\s*(\D*)$/u', $priceString, $currencyMatches);
-        $parsedCurrency = trim(!empty($currencyMatches[1]) ? $currencyMatches[1] : $currencyMatches[3]);
-
-        if (!isset(self::$currencies)) {
-            self::$currencies = json_decode(file_get_contents(__DIR__ . '/currencies.json'), true);
-        }
-
-        if (isset(self::$currencies[$parsedCurrency])) {
-            $this->currencySymbol = self::$currencies[$parsedCurrency]['symbol']['default']['display'];
-            $this->currencyIsoCode = $parsedCurrency;
-            $this->currencyName = self::$currencies[$parsedCurrency]['name'];
+        if (empty($currencyMatches)) {
+            $this->currencySymbol = '';
+            $this->currencyIsoCode = '';
+            $this->currencyName = '';
+            return;
         } else {
-            foreach (self::$currencies as $currencyIsoCode => $currency) {
-                if ($currency['symbol']['default']['display'] == $parsedCurrency || $currency['symbol']['native']['display'] == $parsedCurrency) {
-                    $this->currencyIsoCode = $currencyIsoCode;
-                    $this->currencySymbol = $parsedCurrency;
-                    $this->currencyName = $currency['name'];
-                    break;
+            if (!isset(self::$currencies)) {
+                self::$currencies = json_decode(file_get_contents(__DIR__ . '/currencies.json'), true);
+            }
+            $currencyMatches = array_reverse($currencyMatches);
+            foreach ($currencyMatches as $currencyMatch) {
+                $currencyMatch = $this->mbTrim(mb_strtoupper($currencyMatch));
+                if (!$currencyMatch) {
+                    continue;
+                }
+                foreach (self::$currencies as $currency) {
+                    if ($currency['iso']['code'] == $currencyMatch || $currency['symbol']['default']['display'] == $currencyMatch) {
+                        $this->currencySymbol = $currency['symbol']['default']['display'];
+                        $this->currencyIsoCode = $currency['iso']['code'];
+                        $this->currencyName = $currency['name'];
+                        break 2;
+                    }
                 }
             }
         }
+    }
+
+    /**
+     * @param $str
+     * @return mixed
+     */
+    public function mbTrim($str)
+    {
+        return preg_replace("/(^\s+)|(\s+$)/us", "", $str);
     }
 
     /**
@@ -99,8 +113,41 @@ class Price
      */
     private function parseAmount($priceString)
     {
+        $priceString = str_replace(',', '.', $priceString);
         $priceAmount = floatval(filter_var($priceString, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION));
         $this->amount = $priceAmount;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCurrencyIsoCode()
+    {
+        return $this->currencyIsoCode;
+    }
+
+    /**
+     * @param mixed $currencyIsoCode
+     */
+    public function setCurrencyIsoCode($currencyIsoCode)
+    {
+        $this->currencyIsoCode = $currencyIsoCode;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAmount()
+    {
+        return $this->amount;
+    }
+
+    /**
+     * @param mixed $amount
+     */
+    public function setAmount($amount)
+    {
+        $this->amount = $amount;
     }
 
     /**
@@ -152,34 +199,17 @@ class Price
     }
 
     /**
-     * @return mixed
+     * Price is valid if a currency can be found and amount is not empty or null
+     * @return bool
      */
-    public function getCurrencyIsoCode()
+    public function isValid()
     {
-        return $this->currencyIsoCode;
-    }
-
-    /**
-     * @param mixed $currencyIsoCode
-     */
-    public function setCurrencyIsoCode($currencyIsoCode)
-    {
-        $this->currencyIsoCode = $currencyIsoCode;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getAmount()
-    {
-        return $this->amount;
-    }
-
-    /**
-     * @param mixed $amount
-     */
-    public function setAmount($amount)
-    {
-        $this->amount = $amount;
+        if ($this->currencyIsoCode == '') {
+            return false;
+        }
+        if ($this->amount == '' || $this->amount == null) {
+            return false;
+        }
+        return true;
     }
 }
